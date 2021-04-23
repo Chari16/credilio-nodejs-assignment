@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const movieRouter = require('./routes/movie');
 
 const app = express();
@@ -12,6 +13,7 @@ if (process.env.NODE_ENV === "development") {
     console.log(" PORT ", process.env.PORT)
     app.use(morgan("dev"));
 }
+app.use(cors())
 
 app.get('/', (req, res) => {
     res.send("Server is up")

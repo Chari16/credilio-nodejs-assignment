@@ -28,6 +28,8 @@ crawl = async (req, res, next) => {
         await page.goto(url);
 
         const movies = await page.evaluate(async() => {
+            // document.querySelectorAll return a NodeList which is not iterable as Array
+            // Need to transform it into a iterable array.
             const elements = Array.from(document.querySelectorAll(".lister-item"))
             return elements.map((movie) => (
                 {
@@ -60,7 +62,30 @@ crawl = async (req, res, next) => {
     }
 }
 
+// GET /api/v1/movies/search?q=
+search = async (req, res, next) => {
+    try {
+        const searchText = req.query.q;
+        console.log(" my search Text ", searchText)
+        fs.readFile("movies.json", "utf-8", (err, data) => {
+            if (err) throw err;
+            const searchedMovies = JSON.parse(data).filter(({ title, genre, description }) => (
+                title.includes(searchText) || genre.includes(searchText) || description.includes(searchText)
+            ))
+            res.status(200).json({
+                success: true,
+                data: searchedMovies,
+                message: "Movies result"
+            })
+        });
+    }
+    catch(e) {
+        next(e)
+    }
+}
+
 module.exports = {
     list,
-    crawl
+    crawl,
+    search
 }
